@@ -6,206 +6,373 @@ import {
   ScrollView,
   Pressable,
   SafeAreaView,
-  SectionList,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 export default function CoursesScreen() {
   const [activeTab, setActiveTab] = useState('Todos');
 
-  const tabs = ['Todos', 'En Progreso', 'Completados', 'Guardados'];
+  const tabs = [
+    { id: 'Todos', label: 'Explorar' },
+    { id: 'En Progreso', label: 'Mi Aprendizaje' },
+    { id: 'Completados', label: 'Logros' },
+    { id: 'Mentorías', label: 'Mentorías' },
+  ];
 
-  const coursesData = [
+  // Datos con colores originales
+  const featuredCourses = [
     {
-      title: 'Mi Aprendizaje',
-      data: [
-        {
-          id: 1,
-          title: 'Desarrollo Web con React',
-          progress: 65,
-          nextLesson: 'Hooks avanzados',
-          enrolled: true,
-        },
-        {
-          id: 2,
-          title: 'Data Science Fundamentals',
-          progress: 40,
-          nextLesson: 'Visualización de datos',
-          enrolled: true,
-        },
-      ],
+      id: 1,
+      title: 'Python para Ciencia de Datos',
+      category: 'Data Science',
+      level: 'Principiante',
+      duration: '8 semanas',
+      students: '2.4K',
+      rating: 4.8,
+      instructor: 'Dra. Elena Martínez',
+      instructorAvatar: '👩‍🔬',
+      color: '#667eea',
+      icon: '📊',
+      description: 'Domina los fundamentos de análisis de datos con Python',
+      featured: true,
     },
     {
-      title: 'Cursos Disponibles',
-      data: [
-        {
-          id: 3,
-          title: 'Introducción a Machine Learning con Python',
-          duration: '10 semanas',
-          students: 178,
-          rating: 4.7,
-          level: 'Principiante',
-          free: true,
-          instructor: 'Máxima Leandro',
-        },
-        {
-          id: 4,
-          title: 'Robótica y Sistemas Autónomos',
-          duration: '12 semanas',
-          students: 294,
-          rating: 4.9,
-          level: 'Intermedio',
-          free: true,
-          instructor: 'Daniela Wong',
-        },
-        {
-          id: 5,
-          title: 'Python para Data Science',
-          duration: '8 semanas',
-          students: 342,
-          rating: 4.8,
-          level: 'Principiante',
-          free: false,
-          instructor: 'Ana Torres',
-        },
-      ],
+      id: 2,
+      title: 'Inteligencia Artificial Ética',
+      category: 'IA & ML',
+      level: 'Intermedio',
+      duration: '10 semanas',
+      students: '1.8K',
+      rating: 4.9,
+      instructor: 'Ing. Sofia Chen',
+      instructorAvatar: '👩‍💻',
+      color: '#764ba2',
+      icon: '🤖',
+      description: 'Desarrolla IA responsable y libre de sesgos',
+      featured: true,
     },
     {
-      title: 'Mentorías',
-      data: [
-        {
-          id: 6,
-          title: 'Sesión de Mentoría: Carrera en Tech',
-          type: '1:1',
-          duration: '45 min',
-          mentor: 'Patricia Ruiz',
-          available: true,
-        },
-        {
-          id: 7,
-          title: 'Workshop: Preparación de CV',
-          type: 'Grupal',
-          duration: '2 horas',
-          mentor: 'Carmen Vega',
-          available: false,
-        },
-      ],
+      id: 3,
+      title: 'Desarrollo Web Full Stack',
+      category: 'Programación',
+      level: 'Principiante',
+      duration: '12 semanas',
+      students: '3.2K',
+      rating: 4.7,
+      instructor: 'Dev. Ana Torres',
+      instructorAvatar: '👩‍🎨',
+      color: '#f093fb',
+      icon: '💻',
+      description: 'Crea aplicaciones web completas desde cero',
+    },
+    {
+      id: 4,
+      title: 'Ciberseguridad para Startups',
+      category: 'Seguridad',
+      level: 'Intermedio',
+      duration: '6 semanas',
+      students: '1.5K',
+      rating: 4.8,
+      instructor: 'Ing. Carmen Vega',
+      instructorAvatar: '👩‍🚀',
+      color: '#4facfe',
+      icon: '🛡️',
+      description: 'Protege tu empresa de amenazas digitales',
     },
   ];
 
-  const featuredMentors = [
+  const learningPaths = [
+    {
+      id: 1,
+      title: 'Ruta Frontend',
+      courses: 6,
+      duration: '24 semanas',
+      progress: 65,
+      color: '#667eea',
+      icon: '🎨',
+    },
+    {
+      id: 2,
+      title: 'Ruta Data Science',
+      courses: 8,
+      duration: '32 semanas',
+      progress: 40,
+      color: '#764ba2',
+      icon: '📈',
+    },
+    {
+      id: 3,
+      title: 'Ruta Ciberseguridad',
+      courses: 5,
+      duration: '20 semanas',
+      progress: 20,
+      color: '#f093fb',
+      icon: '🛡️',
+    },
+  ];
+
+  const mentors = [
     {
       id: 1,
       name: 'Daniela Wong',
       role: 'Ingeniera en Robótica',
+      company: 'NASA JPL',
       specialty: 'Sistemas Autónomos',
       rating: 4.9,
+      sessions: 124,
+      avatar: '👩‍🚀',
+      bio: 'Líder en desarrollo de sistemas robóticos para exploración espacial. Apasionada por inspirar a nuevas generaciones en STEM.',
+      availability: ['Lun', 'Mié', 'Vie'],
+      expertise: ['Robótica', 'IA', 'Sistemas Embebidos']
     },
     {
       id: 2,
       name: 'Máxima Leandro',
-      role: 'Data Scientist',
+      role: 'Chief Data Scientist',
+      company: 'Google AI',
       specialty: 'Machine Learning',
-      rating: 4.7,
-    },
-    {
-      id: 3,
-      name: 'Ana Torres',
-      role: 'Software Engineer',
-      specialty: 'Python & Data Science',
       rating: 4.8,
+      sessions: 89,
+      avatar: '👩‍💻',
+      bio: 'Especialista en algoritmos de ML y ética en IA. Mentora de mujeres en carreras técnicas.',
+      availability: ['Mar', 'Jue'],
+      expertise: ['Machine Learning', 'Python', 'Análisis de Datos']
     },
   ];
 
-  const renderLearningItem = ({ item }) => (
-    <Pressable style={styles.learningCard}>
-      <View style={styles.learningHeader}>
-        <Text style={styles.learningTitle}>{item.title}</Text>
-        <Text style={styles.progressPercent}>{item.progress}%</Text>
-      </View>
-      <View style={styles.progressBar}>
-        <View 
-          style={[styles.progressFill, { width: `${item.progress}%` }]} 
-        />
-      </View>
-      <Text style={styles.nextLesson}>Próxima lección: {item.nextLesson}</Text>
-      <Pressable style={styles.continueButton}>
-        <Text style={styles.continueButtonText}>Continuar</Text>
-      </Pressable>
-    </Pressable>
-  );
+  const achievements = [
+    {
+      id: 1,
+      title: 'Aprendiz STEM',
+      description: 'Completa tu primer curso',
+      progress: 1,
+      total: 1,
+      icon: '🌟',
+      unlocked: true,
+    },
+    {
+      id: 2,
+      title: 'Exploradora de Datos',
+      description: 'Completa 3 cursos de Data Science',
+      progress: 2,
+      total: 3,
+      icon: '📊',
+      unlocked: false,
+    },
+    {
+      id: 3,
+      title: 'Mentora Junior',
+      description: 'Ayuda a 5 compañeras',
+      progress: 3,
+      total: 5,
+      icon: '💫',
+      unlocked: false,
+    },
+  ];
 
-  const renderCourseItem = ({ item }) => (
-    <Pressable style={styles.courseCard}>
+  const renderFeaturedCourse = (course) => (
+    <View key={course.id} style={[
+      styles.featuredCourseCard,
+      { borderLeftColor: course.color, borderLeftWidth: 4 }
+    ]}>
+      {/* Header del curso */}
       <View style={styles.courseHeader}>
-        <Text style={styles.courseTitle}>{item.title}</Text>
-        {item.free && (
-          <View style={styles.freeBadge}>
-            <Text style={styles.freeText}>Gratis</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.instructor}>Por {item.instructor}</Text>
-      <View style={styles.courseMeta}>
-        <Text style={styles.courseMetaText}>{item.duration}</Text>
-        <Text style={styles.courseMetaText}>•</Text>
-        <Text style={styles.courseMetaText}>{item.students} estudiantes</Text>
-        <Text style={styles.courseMetaText}>•</Text>
-        <Text style={styles.courseMetaText}>⭐ {item.rating}</Text>
-      </View>
-      <View style={styles.levelContainer}>
-        <Text style={styles.levelText}>{item.level}</Text>
-      </View>
-      <Pressable style={styles.enrollButton}>
-        <Text style={styles.enrollButtonText}>
-          {item.free ? 'Inscribirse' : 'Comprar'}
-        </Text>
-      </Pressable>
-    </Pressable>
-  );
-
-  const renderMentorshipItem = ({ item }) => (
-    <Pressable style={styles.mentorshipCard}>
-      <View style={styles.mentorshipHeader}>
-        <Text style={styles.mentorshipTitle}>{item.title}</Text>
-        <View style={[
-          styles.typeBadge,
-          item.type === '1:1' ? styles.oneOnOneBadge : styles.groupBadge
-        ]}>
-          <Text style={styles.typeText}>{item.type}</Text>
+        <View style={[styles.courseIconContainer, { backgroundColor: course.color + '20' }]}>
+          <Text style={styles.courseIcon}>{course.icon}</Text>
+        </View>
+        <View style={[styles.courseCategory, { backgroundColor: course.color + '20' }]}>
+          <Text style={[styles.categoryText, { color: course.color }]}>{course.category}</Text>
         </View>
       </View>
-      <Text style={styles.mentor}>Mentor: {item.mentor}</Text>
-      <View style={styles.mentorshipMeta}>
-        <Text style={styles.mentorshipMetaText}>{item.duration}</Text>
-        <View style={[
-          styles.availabilityBadge,
-          item.available ? styles.availableBadge : styles.unavailableBadge
-        ]}>
-          <Text style={styles.availabilityText}>
-            {item.available ? 'Disponible' : 'Próximamente'}
+      
+      {/* Información principal */}
+      <View style={styles.courseContent}>
+        <Text style={styles.featuredCourseTitle}>{course.title}</Text>
+        <Text style={styles.courseDescription}>{course.description}</Text>
+        
+        {/* Instructor con avatar */}
+        <View style={styles.instructorSection}>
+          <View style={[styles.instructorAvatar, { backgroundColor: course.color + '20' }]}>
+            <Text style={styles.avatarText}>{course.instructorAvatar}</Text>
+          </View>
+          <View style={styles.instructorInfo}>
+            <Text style={styles.instructorName}>{course.instructor}</Text>
+            <Text style={styles.courseLevel}>{course.level}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Estadísticas del curso */}
+      <View style={styles.courseStats}>
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{course.duration}</Text>
+          <Text style={styles.statLabel}>Duración</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{course.students}</Text>
+          <Text style={styles.statLabel}>Estudiantes</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>⭐ {course.rating}</Text>
+          <Text style={styles.statLabel}>Rating</Text>
+        </View>
+      </View>
+
+      {/* Botón de acción */}
+      <Pressable 
+        style={[styles.enrollButton, { backgroundColor: course.color }]}
+        onPress={() => console.log('Inscribirse a:', course.title)}
+      >
+        <Text style={styles.enrollButtonText}>Comenzar Ahora</Text>
+      </Pressable>
+    </View>
+  );
+
+  const renderLearningPath = (path) => (
+    <Pressable key={path.id} style={[
+      styles.learningPathCard,
+      { borderLeftColor: path.color, borderLeftWidth: 4 }
+    ]}>
+      <View style={styles.pathHeader}>
+        <View style={[styles.pathIcon, { backgroundColor: path.color + '20' }]}>
+          <Text style={[styles.pathIconText, { color: path.color }]}>{path.icon}</Text>
+        </View>
+        <View style={styles.pathInfo}>
+          <Text style={styles.pathTitle}>{path.title}</Text>
+          <Text style={styles.pathMeta}>{path.courses} cursos • {path.duration}</Text>
+        </View>
+      </View>
+      
+      <View style={styles.progressSection}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.progressLabel}>Progreso</Text>
+          <Text style={[styles.progressPercent, { color: path.color }]}>{path.progress}%</Text>
+        </View>
+        <View style={styles.progressBar}>
+          <View 
+            style={[
+              styles.progressFill, 
+              { 
+                width: `${path.progress}%`,
+                backgroundColor: path.color
+              }
+            ]} 
+          />
+        </View>
+      </View>
+      
+      <Pressable style={[styles.continuePathButton, { borderColor: path.color }]}>
+        <Text style={[styles.continueButtonText, { color: path.color }]}>Continuar Ruta</Text>
+      </Pressable>
+    </Pressable>
+  );
+
+  const renderMentorCard = (mentor) => (
+    <Pressable key={mentor.id} style={[styles.mentorCard, { borderLeftColor: '#667eea', borderLeftWidth: 4 }]}>
+      <View style={styles.mentorHeader}>
+        <View style={[styles.mentorAvatar, { backgroundColor: '#667eea20' }]}>
+          <Text style={styles.avatarText}>{mentor.avatar}</Text>
+        </View>
+        <View style={styles.mentorInfo}>
+          <Text style={styles.mentorName}>{mentor.name}</Text>
+          <Text style={[styles.mentorRole, { color: '#667eea' }]}>{mentor.role}</Text>
+          <Text style={styles.mentorCompany}>{mentor.company}</Text>
+        </View>
+        <View style={[styles.ratingBadge, { backgroundColor: '#667eea20' }]}>
+          <Text style={[styles.ratingText, { color: '#667eea' }]}>⭐ {mentor.rating}</Text>
+        </View>
+      </View>
+      
+      <Text style={styles.mentorBio}>{mentor.bio}</Text>
+      
+      <View style={styles.mentorDetails}>
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>Especialidades</Text>
+          <View style={styles.expertiseContainer}>
+            {mentor.expertise.map((skill, index) => (
+              <View key={index} style={[styles.skillTag, { backgroundColor: '#667eea20' }]}>
+                <Text style={[styles.skillText, { color: '#8A2BE2' }]}>{skill}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+        
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>Disponibilidad</Text>
+          <View style={styles.availabilityContainer}>
+            {mentor.availability.map((day, index) => (
+              <View key={index} style={[styles.dayTag, { backgroundColor: '#764ba220' }]}>
+                <Text style={[styles.dayText, { color: '#764ba2' }]}>{day}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+      
+      <View style={styles.mentorFooter}>
+        <View style={styles.sessionInfo}>
+          <Text style={styles.sessionsText}>{mentor.sessions} sesiones realizadas</Text>
+        </View>
+        <Pressable style={[styles.bookButton, { backgroundColor: '#8A2BE2' }]}>
+          <Text style={styles.bookButtonText}>Reservar Sesión</Text>
+        </Pressable>
+      </View>
+    </Pressable>
+  );
+
+  const renderAchievement = (achievement) => (
+    <View key={achievement.id} style={[styles.achievementCard, { borderLeftColor: '#8A2BE2', borderLeftWidth: 4 }]}>
+      <View style={[styles.achievementIcon, { backgroundColor: '#667eea20' }]}>
+        <Text style={[styles.achievementIconText, { color: '#8A2BE2' }]}>{achievement.icon}</Text>
+      </View>
+      <View style={styles.achievementInfo}>
+        <Text style={styles.achievementTitle}>{achievement.title}</Text>
+        <Text style={styles.achievementDesc}>{achievement.description}</Text>
+        <View style={styles.achievementProgress}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill, 
+                { 
+                  width: `${(achievement.progress / achievement.total) * 100}%`,
+                  backgroundColor: achievement.unlocked ? '#8A2BE2' : '#CCCCCC'
+                }
+              ]} 
+            />
+          </View>
+          <Text style={styles.progressText}>
+            {achievement.progress}/{achievement.total}
           </Text>
         </View>
       </View>
-    </Pressable>
+      {achievement.unlocked && (
+        <View style={styles.unlockedBadge}>
+          <Text style={styles.unlockedText}>🎉</Text>
+        </View>
+      )}
+    </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        {/* Header */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header Inspirador */}
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <Text style={styles.title}>Cursos</Text>
-            <View style={styles.mentorshipBadge}>
-              <Text style={styles.mentorshipText}>8 Mentorías</Text>
-            </View>
+          <View style={styles.headerContent}>
+            <Text style={styles.greeting}>¡Hola, Futura Líder!</Text>
+            <Text style={styles.subtitle}>
+              Descubre tu potencial en STEM {'\n'}
+              <Text style={styles.highlight}>Aprende, crece e inspira</Text>
+            </Text>
           </View>
-          <Text style={styles.subtitle}>
-            Aprende con las mejores en STEM
-          </Text>
+          <View style={styles.decorativeCircle} />
         </View>
 
-        {/* Tabs */}
+        {/* Tabs de Navegación */}
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -213,83 +380,123 @@ export default function CoursesScreen() {
         >
           {tabs.map((tab) => (
             <Pressable
-              key={tab}
+              key={tab.id}
               style={[
                 styles.tab,
-                activeTab === tab && styles.activeTab,
+                activeTab === tab.id && styles.activeTab,
               ]}
-              onPress={() => setActiveTab(tab)}
+              onPress={() => setActiveTab(tab.id)}
             >
               <Text
                 style={[
                   styles.tabText,
-                  activeTab === tab && styles.activeTabText,
+                  activeTab === tab.id && styles.activeTabText,
                 ]}
               >
-                {tab}
+                {tab.label}
               </Text>
             </Pressable>
           ))}
         </ScrollView>
 
-        {/* Logro */}
-        <View style={styles.achievementSection}>
-          <View style={styles.achievementCard}>
-            <Text style={styles.achievementTitle}>
-              Completa 3 cursos y gana una insignia
-            </Text>
-            <Text style={styles.achievementText}>
-              Te faltan 2 cursos para desbloquear el logro "Aprendiz STEM"
-            </Text>
-          </View>
-        </View>
-
-        {/* Cursos y Mentorías */}
-        <SectionList
-          sections={coursesData}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item, section }) => {
-            if (section.title === 'Mi Aprendizaje') {
-              return renderLearningItem({ item });
-            } else if (section.title === 'Cursos Disponibles') {
-              return renderCourseItem({ item });
-            } else {
-              return renderMentorshipItem({ item });
-            }
-          }}
-          renderSectionHeader={({ section: { title } }) => (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{title}</Text>
-              <Pressable>
-                <Text style={styles.seeAllText}>Ver todo</Text>
-              </Pressable>
+        {/* Contenido Principal */}
+        {activeTab === 'Todos' && (
+          <>
+            {/* Cursos Destacados */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>✨ Cursos Destacados</Text>
+                <Text style={styles.sectionSubtitle}>
+                  Diseñados por mujeres líderes en STEM
+                </Text>
+              </View>
+              
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.featuredCoursesContainer}
+              >
+                {featuredCourses.map(renderFeaturedCourse)}
+              </ScrollView>
             </View>
-          )}
-          scrollEnabled={false}
-        />
 
-        {/* Mentorías Destacadas */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Mentoras Destacadas</Text>
-            <Pressable>
-              <Text style={styles.seeAllText}>Ver todas</Text>
-            </Pressable>
+            {/* Rutas de Aprendizaje */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>🎯 Rutas de Aprendizaje</Text>
+                <Text style={styles.sectionSubtitle}>
+                  Sigue un camino estructurado hacia el éxito
+                </Text>
+              </View>
+              {learningPaths.map(renderLearningPath)}
+            </View>
+          </>
+        )}
+
+        {activeTab === 'En Progreso' && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>📚 Mi Aprendizaje</Text>
+              <Text style={styles.sectionSubtitle}>
+                Continúa donde te quedaste
+              </Text>
+            </View>
+            {learningPaths.map(renderLearningPath)}
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {featuredMentors.map((mentor) => (
-              <Pressable key={mentor.id} style={styles.mentorCard}>
-                <View style={styles.mentorAvatar} />
-                <Text style={styles.mentorName}>{mentor.name}</Text>
-                <Text style={styles.mentorRole}>{mentor.role}</Text>
-                <Text style={styles.mentorSpecialty}>{mentor.specialty}</Text>
-                <View style={styles.mentorRating}>
-                  <Text style={styles.ratingText}>⭐ {mentor.rating}</Text>
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
+        )}
+
+        {activeTab === 'Completados' && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>🏆 Mis Logros</Text>
+              <Text style={styles.sectionSubtitle}>
+                Celebra tus progresos en STEM
+              </Text>
+            </View>
+            {achievements.map(renderAchievement)}
+          </View>
+        )}
+
+        {activeTab === 'Mentorías' && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>💫 Mentorías Disponibles</Text>
+              <Text style={styles.sectionSubtitle}>
+                Conecta con mujeres inspiradoras en STEM
+              </Text>
+            </View>
+            
+            <View style={styles.mentorshipStats}>
+              <View style={[styles.statCard, { backgroundColor: '#667eea20' }]}>
+                <Text style={[styles.statNumber, { color: '#667eea' }]}>{mentors.length}</Text>
+                <Text style={styles.statDescription}>Mentoras Activas</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: '#764ba220' }]}>
+                <Text style={[styles.statNumber, { color: '#764ba2' }]}>247</Text>
+                <Text style={styles.statDescription}>Sesiones Realizadas</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: '#f093fb20' }]}>
+                <Text style={[styles.statNumber, { color: '#f093fb' }]}>4.8</Text>
+                <Text style={styles.statDescription}>Rating Promedio</Text>
+              </View>
+            </View>
+
+            <View style={styles.mentorsList}>
+              {mentors.map(renderMentorCard)}
+            </View>
+          </View>
+        )}
+
+        {/* ⭐⭐ MENSAJE INSPIRADOR - APARECE EN TODAS LAS PESTAÑAS ⭐⭐ */}
+        <View style={styles.inspirationSection}>
+          <Text style={styles.inspirationQuote}>
+            "Cada mujer en STEM que persigue sus sueños, allana el camino para las que vienen detrás"
+          </Text>
+          <Text style={styles.inspirationAuthor}>
+            - Comunidad STEM Sisters
+          </Text>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -298,356 +505,518 @@ export default function CoursesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingBottom: 10,
+    backgroundColor: '#8A2BE2',
+    padding: 24,
+    paddingTop: 40,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+  headerContent: {
+    zIndex: 2,
   },
-  title: {
+  greeting: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  mentorshipBadge: {
-    backgroundColor: '#E6E6FA',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  mentorshipText: {
-    color: '#8A2BE2',
-    fontSize: 14,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#7f8c8d',
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: 22,
+  },
+  highlight: {
+    fontWeight: '600',
+    color: '#FFD93D',
+  },
+  decorativeCircle: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    top: -50,
+    right: -50,
   },
   tabsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    flexDirection: 'row',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F8F9FA',
     marginRight: 10,
   },
   activeTab: {
     backgroundColor: '#8A2BE2',
   },
   tabText: {
-    color: '#7f8c8d',
+    color: '#666666',
     fontSize: 14,
     fontWeight: '500',
   },
   activeTabText: {
-    color: '#fff',
-  },
-  achievementSection: {
-    padding: 20,
-  },
-  achievementCard: {
-    backgroundColor: '#FFF0F5',
-    padding: 15,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#8A2BE2',
-  },
-  achievementTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 4,
-  },
-  achievementText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#fff',
-    marginTop: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-  },
-  seeAllText: {
-    color: '#8A2BE2',
-    fontWeight: '600',
+    color: '#FFFFFF',
   },
   section: {
-    backgroundColor: '#fff',
-    marginTop: 10,
     padding: 20,
   },
-  learningCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginHorizontal: 20,
-    marginBottom: 10,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  sectionHeader: {
+    marginBottom: 20,
   },
-  learningHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  learningTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    flex: 1,
-  },
-  progressPercent: {
-    fontSize: 16,
+  sectionTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#8A2BE2',
+    color: '#2C3E50',
+    marginBottom: 4,
   },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    marginBottom: 8,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#8A2BE2',
-    borderRadius: 3,
-  },
-  nextLesson: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginBottom: 12,
-  },
-  continueButton: {
-    backgroundColor: '#8A2BE2',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  continueButtonText: {
-    color: '#fff',
+  sectionSubtitle: {
     fontSize: 14,
-    fontWeight: '600',
+    color: '#7F8C8D',
   },
-  courseCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginHorizontal: 20,
-    marginBottom: 10,
+  // Estilos mejorados para cursos destacados
+  featuredCoursesContainer: {
+    paddingHorizontal: 5,
+  },
+  featuredCourseCard: {
+    width: width * 0.85,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    padding: 20,
+    marginHorizontal: 8,
+    marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 4,
   },
   courseHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  courseTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    flex: 1,
-    marginRight: 10,
+  courseIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  freeBadge: {
-    backgroundColor: '#90EE90',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+  courseIcon: {
+    fontSize: 20,
   },
-  freeText: {
-    color: '#006400',
+  courseCategory: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  categoryText: {
     fontSize: 12,
     fontWeight: '600',
   },
-  instructor: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 8,
+  courseContent: {
+    marginBottom: 16,
   },
-  courseMeta: {
+  featuredCourseTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 8,
+    lineHeight: 24,
+  },
+  courseDescription: {
+    fontSize: 14,
+    color: '#7F8C8D',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  instructorSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-    flexWrap: 'wrap',
   },
-  courseMetaText: {
-    fontSize: 12,
-    color: '#7f8c8d',
-    marginRight: 6,
+  instructorAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  levelContainer: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E6E6FA',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 12,
+  avatarText: {
+    fontSize: 18,
   },
-  levelText: {
-    color: '#8A2BE2',
-    fontSize: 12,
+  instructorInfo: {
+    flex: 1,
+  },
+  instructorName: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#2C3E50',
+    marginBottom: 2,
+  },
+  courseLevel: {
+    fontSize: 12,
+    color: '#7F8C8D',
+  },
+  courseStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: '#7F8C8D',
+  },
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#E0E0E0',
   },
   enrollButton: {
-    backgroundColor: '#8A2BE2',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   enrollButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  mentorshipCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginHorizontal: 20,
-    marginBottom: 10,
+  learningPathCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF69B4',
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  mentorshipHeader: {
+  pathHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  pathIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  pathIconText: {
+    fontSize: 20,
+  },
+  pathInfo: {
+    flex: 1,
+  },
+  pathTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2C3E50',
     marginBottom: 4,
   },
-  mentorshipTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
-    flex: 1,
-    marginRight: 10,
-  },
-  typeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  oneOnOneBadge: {
-    backgroundColor: '#FFE4E1',
-  },
-  groupBadge: {
-    backgroundColor: '#F0E68C',
-  },
-  typeText: {
+  pathMeta: {
     fontSize: 12,
-    fontWeight: '600',
+    color: '#7F8C8D',
   },
-  mentor: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 8,
+  progressSection: {
+    marginBottom: 16,
   },
-  mentorshipMeta: {
+  progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
-  mentorshipMetaText: {
-    fontSize: 12,
-    color: '#7f8c8d',
+  progressLabel: {
+    fontSize: 14,
+    color: '#7F8C8D',
   },
-  availabilityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+  progressPercent: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
-  availableBadge: {
-    backgroundColor: '#90EE90',
+  progressBar: {
+    height: 6,
+    backgroundColor: '#ECF0F1',
+    borderRadius: 3,
+    overflow: 'hidden',
   },
-  unavailableBadge: {
-    backgroundColor: '#FFB6C1',
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
   },
-  availabilityText: {
-    fontSize: 12,
+  continuePathButton: {
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  continueButtonText: {
+    fontSize: 14,
     fontWeight: '600',
   },
-  mentorCard: {
-    backgroundColor: '#f8f9fa',
-    padding: 15,
+  // Estilos para mentorías
+  mentorshipStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  statCard: {
+    flex: 1,
+    padding: 16,
     borderRadius: 12,
-    marginRight: 15,
-    width: 140,
     alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  statDescription: {
+    fontSize: 11,
+    color: '#7F8C8D',
+    textAlign: 'center',
+  },
+  mentorsList: {
+    // Contenedor para la lista vertical
+  },
+  mentorCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  mentorHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
   mentorAvatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#8A2BE2',
-    marginBottom: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  mentorInfo: {
+    flex: 1,
   },
   mentorName: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#2C3E50',
     marginBottom: 2,
-    textAlign: 'center',
   },
   mentorRole: {
-    fontSize: 12,
-    color: '#7f8c8d',
+    fontSize: 14,
     marginBottom: 2,
-    textAlign: 'center',
+    fontWeight: '600',
   },
-  mentorSpecialty: {
-    fontSize: 11,
-    color: '#8A2BE2',
-    fontWeight: '500',
-    marginBottom: 8,
-    textAlign: 'center',
+  mentorCompany: {
+    fontSize: 12,
+    color: '#7F8C8D',
   },
-  mentorRating: {
-    backgroundColor: '#FFF0F5',
+  ratingBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   ratingText: {
     fontSize: 12,
-    color: '#2c3e50',
     fontWeight: '600',
+  },
+  mentorBio: {
+    fontSize: 14,
+    color: '#5D6D7E',
+    lineHeight: 20,
+    marginBottom: 16,
+    fontStyle: 'italic',
+  },
+  mentorDetails: {
+    marginBottom: 16,
+  },
+  detailSection: {
+    marginBottom: 12,
+  },
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2C3E50',
+    marginBottom: 8,
+  },
+  expertiseContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  skillTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 6,
+  },
+  skillText: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  availabilityContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dayTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 6,
+    marginBottom: 4,
+  },
+  dayText: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  mentorFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sessionInfo: {
+    flex: 1,
+  },
+  sessionsText: {
+    fontSize: 12,
+    color: '#7F8C8D',
+  },
+  bookButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  bookButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  achievementCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  achievementIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  achievementIconText: {
+    fontSize: 20,
+  },
+  achievementInfo: {
+    flex: 1,
+  },
+  achievementTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 4,
+  },
+  achievementDesc: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginBottom: 8,
+  },
+  achievementProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  progressText: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginLeft: 8,
+  },
+  unlockedBadge: {
+    marginLeft: 12,
+  },
+  unlockedText: {
+    fontSize: 20,
+  },
+  // ⭐⭐ ESTILOS DEL MENSAJE INSPIRADOR ⭐⭐
+  inspirationSection: {
+    backgroundColor: '#8A2BE2',
+    margin: 20,
+    padding: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  inspirationQuote: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 22,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  inspirationAuthor: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '400',
   },
 });
