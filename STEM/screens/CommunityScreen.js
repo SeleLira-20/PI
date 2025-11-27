@@ -7,14 +7,13 @@ import {
   Pressable,
   SafeAreaView,
   TextInput,
-  SectionList,
 } from 'react-native';
 
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState('Publicaciones');
   const [activeFilter, setActiveFilter] = useState('Todo');
 
-  const filters = ['Todo', 'IA & ML', 'Ingeniería', 'Ciencia'];
+  const filters = ['Todo', 'IA & ML', 'Ingeniería', 'Ciencia', 'Mentoría', 'Carreras', 'Desarrollo Web', 'Data Science', 'Robótica', 'Biotecnología'];
   
   const posts = [
     {
@@ -26,26 +25,44 @@ export default function CommunityScreen() {
       tags: ['IA', 'Machine Learning', 'TensorFlow'],
       likes: 42,
       comments: 15,
+      avatar: '👩‍💻',
+      category: 'IA & ML'
     },
     {
       id: 2,
       user: 'Laura Kim',
       role: 'Estudiante de CS',
       time: 'Hace 2 horas',
-      content: '¿Cómo manejan el balance entre vida personal y carrera en tech?',
-      tags: [],
+      content: '¿Cómo manejan el balance entre vida personal y carrera en tech? Compartan sus tips 💫',
+      tags: ['Bienestar', 'Carrera'],
       likes: 24,
       comments: 24,
+      avatar: '👩‍🎓',
+      category: 'Carreras'
     },
     {
       id: 3,
       user: 'Ana Beltrán',
       role: 'Ingeniera de Software',
       time: 'Hace 4 horas',
-      content: '¿Qué lenguaje recomiendan para empezar en desarrollo móvil?',
-      tags: [],
+      content: '¿Qué lenguaje recomiendan para empezar en desarrollo móvil? Estoy entre Kotlin y Swift 🚀',
+      tags: ['Desarrollo Móvil', 'Programación'],
       likes: 18,
       comments: 18,
+      avatar: '👩‍🔧',
+      category: 'Ingeniería'
+    },
+    {
+      id: 4,
+      user: 'María González',
+      role: 'Bioingeniera',
+      time: 'Hace 5 horas',
+      content: 'Acabo de publicar mi investigación sobre nuevos materiales biocompatibles. ¡Estoy muy emocionada! 🧪',
+      tags: ['Investigación', 'Biotecnología'],
+      likes: 32,
+      comments: 8,
+      avatar: '👩‍🔬',
+      category: 'Biotecnología'
     },
   ];
 
@@ -56,20 +73,43 @@ export default function CommunityScreen() {
       time: 'Hace 3 horas',
       content: '¿Alguien sabe de buenos recursos para aprender Docker?',
       answers: 8,
+      avatar: '👩‍🔬',
+      category: 'Ingeniería'
+    },
+    {
+      id: 2,
+      user: 'Sofia Chen',
+      time: 'Hace 6 horas',
+      content: '¿Qué consejos tienen para postular a internships en FAANG companies?',
+      answers: 12,
+      avatar: '👩‍💼',
+      category: 'Carreras'
     },
   ];
+
+  const filteredPosts = activeFilter === 'Todo' 
+    ? posts 
+    : posts.filter(post => post.category === activeFilter);
+
+  const filteredQuestions = activeFilter === 'Todo'
+    ? questions
+    : questions.filter(question => question.category === activeFilter);
 
   const renderPost = (post) => (
     <View key={post.id} style={styles.postCard}>
       <View style={styles.postHeader}>
         <View style={styles.userInfo}>
-          <View style={styles.avatar} />
-          <View>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarEmoji}>{post.avatar}</Text>
+          </View>
+          <View style={styles.userText}>
             <Text style={styles.userName}>{post.user}</Text>
             <Text style={styles.userRole}>{post.role}</Text>
           </View>
         </View>
-        <Text style={styles.time}>{post.time}</Text>
+        <View style={styles.timeContainer}>
+          <Text style={styles.time}>{post.time}</Text>
+        </View>
       </View>
       
       <Text style={styles.postContent}>{post.content}</Text>
@@ -78,7 +118,7 @@ export default function CommunityScreen() {
         <View style={styles.tagsContainer}>
           {post.tags.map((tag, index) => (
             <View key={index} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
+              <Text style={styles.tagText}>#{tag}</Text>
             </View>
           ))}
         </View>
@@ -86,13 +126,13 @@ export default function CommunityScreen() {
       
       <View style={styles.postActions}>
         <Pressable style={styles.actionButton}>
-          <Text style={styles.actionText}>👍 {post.likes}</Text>
+          <Text style={styles.actionText}>💜 {post.likes}</Text>
         </Pressable>
         <Pressable style={styles.actionButton}>
-          <Text style={styles.actionText}>💬 {post.comments} respuestas</Text>
+          <Text style={styles.actionText}>💬 {post.comments}</Text>
         </Pressable>
         <Pressable style={styles.actionButton}>
-          <Text style={styles.actionText}>Responder</Text>
+          <Text style={styles.actionText}>🔄 Compartir</Text>
         </Pressable>
       </View>
     </View>
@@ -102,9 +142,14 @@ export default function CommunityScreen() {
     <View key={question.id} style={styles.questionCard}>
       <View style={styles.postHeader}>
         <View style={styles.userInfo}>
-          <View style={styles.avatar} />
-          <View>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarEmoji}>{question.avatar}</Text>
+          </View>
+          <View style={styles.userText}>
             <Text style={styles.userName}>{question.user}</Text>
+            <View style={styles.questionBadge}>
+              <Text style={styles.questionBadgeText}>Pregunta</Text>
+            </View>
           </View>
         </View>
         <Text style={styles.time}>{question.time}</Text>
@@ -113,44 +158,36 @@ export default function CommunityScreen() {
       <Text style={styles.postContent}>{question.content}</Text>
       
       <View style={styles.postActions}>
-        <Pressable style={styles.actionButton}>
-          <Text style={styles.actionText}>{question.answers} respuestas</Text>
+        <Pressable style={styles.answerButton}>
+          <Text style={styles.answerButtonText}>📝 Responder</Text>
         </Pressable>
-        <Pressable style={styles.actionButton}>
-          <Text style={styles.actionText}>Responder</Text>
-        </Pressable>
+        <Text style={styles.answerCount}>{question.answers} respuestas</Text>
       </View>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Comunidad</Text>
-          <Text style={styles.subtitle}>
-            Buscar publicaciones, temas...
-          </Text>
-        </View>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Header Inspirador */}
+            <View style={styles.header}>
+              <View style={styles.headerContent}>
+                <Text style={styles.greeting}>Comunidad</Text>
+                <Text style={styles.subtitle}>
+                  Conecta, comparte y crece con mujeres en STEM {'\n'}
+                </Text>
+              </View>
+              <View style={styles.decorativeCircle} />
+            </View>
 
-        {/* Barra de búsqueda */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar en la comunidad..."
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        {/* Tabs */}
+        {/* Tabs con diseño moderno */}
         <View style={styles.tabsContainer}>
           <Pressable
             style={[styles.tab, activeTab === 'Publicaciones' && styles.activeTab]}
             onPress={() => setActiveTab('Publicaciones')}
           >
             <Text style={[styles.tabText, activeTab === 'Publicaciones' && styles.activeTabText]}>
-              Publicaciones
+              📝 Publicaciones
             </Text>
           </Pressable>
           <Pressable
@@ -158,50 +195,80 @@ export default function CommunityScreen() {
             onPress={() => setActiveTab('Preguntas')}
           >
             <Text style={[styles.tabText, activeTab === 'Preguntas' && styles.activeTabText]}>
-              Preguntas
+              ❓ Preguntas
             </Text>
           </Pressable>
         </View>
 
-        {/* Filtros */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filtersContainer}
-        >
-          {filters.map((filter) => (
-            <Pressable
-              key={filter}
-              style={[
-                styles.filter,
-                activeFilter === filter && styles.activeFilter,
-              ]}
-              onPress={() => setActiveFilter(filter)}
-            >
-              <Text
+        {/* Filtros con scroll horizontal - MÁS TEMAS */}
+        <View style={styles.filtersSection}>
+          <Text style={styles.filtersTitle}>Explorar temas</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.filtersContainer}
+            contentContainerStyle={styles.filtersContent}
+          >
+            {filters.map((filter) => (
+              <Pressable
+                key={filter}
                 style={[
-                  styles.filterText,
-                  activeFilter === filter && styles.activeFilterText,
+                  styles.filter,
+                  activeFilter === filter && styles.activeFilter,
                 ]}
+                onPress={() => setActiveFilter(filter)}
               >
-                {filter}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+                <Text
+                  style={[
+                    styles.filterText,
+                    activeFilter === filter && styles.activeFilterText,
+                  ]}
+                >
+                  {filter}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
 
-        {/* Contenido */}
+        {/* Botón de nueva publicación */}
+        <Pressable style={styles.newPostButton}>
+          <Text style={styles.newPostButtonText}>+ Nueva Publicación</Text>
+        </Pressable>
+
+        {/* Contenido filtrado */}
         <View style={styles.content}>
           {activeTab === 'Publicaciones' ? (
             <>
-              {posts.map(renderPost)}
+              {filteredPosts.length > 0 ? (
+                filteredPosts.map(renderPost)
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateEmoji}>👩‍🔬</Text>
+                  <Text style={styles.emptyStateText}>
+                    No hay publicaciones en {activeFilter}
+                  </Text>
+                </View>
+              )}
             </>
           ) : (
             <>
-              {questions.map(renderQuestion)}
+              {filteredQuestions.length > 0 ? (
+                filteredQuestions.map(renderQuestion)
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateEmoji}>❓</Text>
+                  <Text style={styles.emptyStateText}>
+                    No hay preguntas en {activeFilter}
+                  </Text>
+                </View>
+              )}
             </>
           )}
         </View>
+
+        {/* Espacio al final */}
+        <View style={styles.bottomSpace} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -210,172 +277,315 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FAF5FF',
   },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingBottom: 10,
+  scrollView: {
+    flex: 1,
   },
-  title: {
+   header: {
+    backgroundColor: '#8A2BE2',
+    padding: 24,
+    paddingTop: 40,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerContent: {
+    zIndex: 2,
+  },
+  greeting: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#FFFFFF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#7f8c8d',
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: 22,
   },
-  searchContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ecf0f1',
-  },
-  searchInput: {
-    backgroundColor: '#f8f9fa',
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
+  decorativeCircle: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    top: -50,
+    right: -50,
   },
   tabsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
-    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 15,
+    borderRadius: 15,
+    padding: 5,
+    shadowColor: '#8A2BE2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   tab: {
     flex: 1,
-    paddingVertical: 15,
+    paddingVertical: 12,
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: 12,
   },
   activeTab: {
-    borderBottomColor: '#8A2BE2',
+    backgroundColor: '#8A2BE2',
+    shadowColor: '#8A2BE2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   tabText: {
-    fontSize: 16,
-    color: '#7f8c8d',
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#8A2BE2',
+    fontSize: 14,
+    color: '#6B7280',
     fontWeight: '600',
   },
-  filtersContainer: {
-    backgroundColor: '#fff',
+  activeTabText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  filtersSection: {
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
     paddingVertical: 15,
+    marginTop: 10,
+  },
+  filtersTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4C1D95',
+    marginBottom: 12,
+  },
+  filtersContainer: {
     flexDirection: 'row',
+  },
+  filtersContent: {
+    paddingRight: 20,
   },
   filter: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F3F4F6',
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   activeFilter: {
     backgroundColor: '#8A2BE2',
+    borderColor: '#7C3AED',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   filterText: {
-    color: '#7f8c8d',
+    color: '#6B7280',
     fontSize: 14,
     fontWeight: '500',
   },
   activeFilterText: {
-    color: '#fff',
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  newPostButton: {
+    backgroundColor: '#8A2BE2',
+    marginHorizontal: 20,
+    marginVertical: 15,
+    paddingVertical: 16,
+    borderRadius: 15,
+    alignItems: 'center',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  newPostButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
   content: {
     padding: 20,
   },
   postCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 16,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   questionCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFD700',
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 16,
+    shadowColor: '#8A2BE2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    borderLeftWidth: 5,
+    borderLeftColor: '#F59E0B',
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 15,
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#8A2BE2',
-    marginRight: 10,
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#EDE9FE',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#DDD6FE',
+  },
+  avatarEmoji: {
+    fontSize: 20,
+  },
+  userText: {
+    flex: 1,
   },
   userName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontWeight: '700',
+    color: '#4C1D95',
+    marginBottom: 2,
   },
   userRole: {
-    fontSize: 14,
-    color: '#7f8c8d',
+    fontSize: 13,
+    color: '#7C3AED',
+    fontWeight: '500',
+  },
+  timeContainer: {
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   time: {
     fontSize: 12,
-    color: '#7f8c8d',
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
   postContent: {
     fontSize: 15,
-    color: '#2c3e50',
-    lineHeight: 20,
-    marginBottom: 12,
+    color: '#374151',
+    lineHeight: 22,
+    marginBottom: 15,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 12,
+    marginBottom: 15,
   },
   tag: {
-    backgroundColor: '#E6E6FA',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
     marginRight: 8,
-    marginBottom: 4,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   tagText: {
-    color: '#8A2BE2',
+    color: '#7C3AED',
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   postActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: '#ecf0f1',
-    paddingTop: 12,
+    borderTopColor: '#F3F4F6',
+    paddingTop: 15,
   },
   actionButton: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
   },
   actionText: {
-    color: '#7f8c8d',
-    fontSize: 14,
+    color: '#6B7280',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  questionBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  questionBadgeText: {
+    color: '#D97706',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  answerButton: {
+    backgroundColor: '#8A2BE2',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  answerButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  answerCount: {
+    color: '#6B7280',
+    fontSize: 13,
+    fontWeight: '600',
+    alignSelf: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  emptyStateEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  bottomSpace: {
+    height: 30,
   },
 });
