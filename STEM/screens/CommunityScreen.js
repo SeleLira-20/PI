@@ -7,15 +7,13 @@ import {
   Pressable,
   SafeAreaView,
   TextInput,
+  Modal,
 } from 'react-native';
 
 export default function CommunityScreen() {
   const [activeTab, setActiveTab] = useState('Publicaciones');
   const [activeFilter, setActiveFilter] = useState('Todo');
-
-  const filters = ['Todo', 'IA & ML', 'Ingeniería', 'Ciencia', 'Mentoría', 'Carreras', 'Desarrollo Web', 'Data Science', 'Robótica', 'Biotecnología'];
-  
-  const posts = [
+  const [posts, setPosts] = useState([
     {
       id: 1,
       user: 'Elena Morales',
@@ -64,8 +62,13 @@ export default function CommunityScreen() {
       avatar: '👩‍🔬',
       category: 'Biotecnología'
     },
-  ];
+  ]);
 
+  const [commentsModalVisible, setCommentsModalVisible] = useState(false);
+  const [selectedPostComments, setSelectedPostComments] = useState([]);
+
+  const filters = ['Todo', 'IA & ML', 'Ingeniería', 'Ciencia', 'Mentoría', 'Carreras', 'Desarrollo Web', 'Data Science', 'Robótica', 'Biotecnología'];
+  
   const questions = [
     {
       id: 1,
@@ -86,6 +89,41 @@ export default function CommunityScreen() {
       category: 'Carreras'
     },
   ];
+
+  // Función para aumentar los corazones
+  const handleLike = (postId) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === postId 
+          ? { ...post, likes: post.likes + 1 }
+          : post
+      )
+    );
+  };
+
+  // Función para mostrar comentarios en modal
+  const handleShowComments = (postId) => {
+    // Datos de ejemplo para comentarios
+    const commentsData = [
+      {
+        id: 1,
+        user: 'María López',
+        avatar: '👩‍💼',
+        time: 'Hace 30 min',
+        comment: '¡Excelente pregunta! Yo he usado TensorFlow en varios proyectos.'
+      },
+      {
+        id: 2,
+        user: 'Ana García',
+        avatar: '👩‍🔬',
+        time: 'Hace 15 min',
+        comment: 'Te recomiendo empezar con los tutoriales oficiales, son muy buenos.'
+      }
+    ];
+    
+    setSelectedPostComments(commentsData);
+    setCommentsModalVisible(true);
+  };
 
   const filteredPosts = activeFilter === 'Todo' 
     ? posts 
@@ -125,10 +163,16 @@ export default function CommunityScreen() {
       )}
       
       <View style={styles.postActions}>
-        <Pressable style={styles.actionButton}>
+        <Pressable 
+          style={styles.actionButton}
+          onPress={() => handleLike(post.id)}
+        >
           <Text style={styles.actionText}>💜 {post.likes}</Text>
         </Pressable>
-        <Pressable style={styles.actionButton}>
+        <Pressable 
+          style={styles.actionButton}
+          onPress={() => handleShowComments(post.id)}
+        >
           <Text style={styles.actionText}>💬 {post.comments}</Text>
         </Pressable>
         <Pressable style={styles.actionButton}>
@@ -168,17 +212,17 @@ export default function CommunityScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Header Inspirador */}
-            <View style={styles.header}>
-              <View style={styles.headerContent}>
-                <Text style={styles.greeting}>Comunidad</Text>
-                <Text style={styles.subtitle}>
-                  Conecta, comparte y crece con mujeres en STEM {'\n'}
-                </Text>
-              </View>
-              <View style={styles.decorativeCircle} />
-            </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header Inspirador */}
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <Text style={styles.greeting}>Comunidad</Text>
+            <Text style={styles.subtitle}>
+              Conecta, comparte y crece con mujeres en STEM {'\n'}
+            </Text>
+          </View>
+          <View style={styles.decorativeCircle} />
+        </View>
 
         {/* Tabs con diseño moderno */}
         <View style={styles.tabsContainer}>
@@ -270,6 +314,54 @@ export default function CommunityScreen() {
         {/* Espacio al final */}
         <View style={styles.bottomSpace} />
       </ScrollView>
+
+      {/* Modal para comentarios */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={commentsModalVisible}
+        onRequestClose={() => setCommentsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Comentarios</Text>
+              <Pressable 
+                style={styles.closeButton}
+                onPress={() => setCommentsModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </Pressable>
+            </View>
+            
+            <ScrollView style={styles.commentsList}>
+              {selectedPostComments.map(comment => (
+                <View key={comment.id} style={styles.commentItem}>
+                  <View style={styles.commentHeader}>
+                    <View style={styles.commentUser}>
+                      <Text style={styles.commentAvatar}>{comment.avatar}</Text>
+                      <Text style={styles.commentUserName}>{comment.user}</Text>
+                    </View>
+                    <Text style={styles.commentTime}>{comment.time}</Text>
+                  </View>
+                  <Text style={styles.commentText}>{comment.comment}</Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={styles.commentInputContainer}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Escribe un comentario..."
+                placeholderTextColor="#9CA3AF"
+              />
+              <Pressable style={styles.sendButton}>
+                <Text style={styles.sendButtonText}>Enviar</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -282,7 +374,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-   header: {
+  header: {
     backgroundColor: '#8A2BE2',
     padding: 24,
     paddingTop: 40,
@@ -587,5 +679,108 @@ const styles = StyleSheet.create({
   },
   bottomSpace: {
     height: 30,
+  },
+  // Estilos para el modal de comentarios
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '70%',
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4C1D95',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: '#6B7280',
+    fontWeight: 'bold',
+  },
+  commentsList: {
+    flex: 1,
+    marginBottom: 15,
+  },
+  commentItem: {
+    backgroundColor: '#F8FAFC',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  commentUser: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  commentAvatar: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  commentUserName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4C1D95',
+  },
+  commentTime: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  commentText: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 15,
+  },
+  commentInput: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 20,
+    marginRight: 10,
+    fontSize: 14,
+    color: '#374151',
+  },
+  sendButton: {
+    backgroundColor: '#8A2BE2',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  sendButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
