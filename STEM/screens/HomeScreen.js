@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,14 @@ import {
   Pressable,
   SafeAreaView,
   Dimensions,
+  Alert,
 } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
-  // Datos de ejemplo mejorados
-  const progressData = [
+  // Datos de ejemplo mejorados con estado
+  const [progressData, setProgressData] = useState([
     {
       title: 'Mi Aprendizaje',
       data: [
@@ -24,6 +25,7 @@ export default function HomeScreen({ navigation }) {
           nextLesson: 'Hooks avanzados',
           icon: '⚛️',
           timeLeft: '2h 30min',
+          enrolled: true,
         },
         {
           id: 2,
@@ -32,6 +34,7 @@ export default function HomeScreen({ navigation }) {
           nextLesson: 'Visualización de datos',
           icon: '📊',
           timeLeft: '4h 15min',
+          enrolled: true,
         },
       ],
     },
@@ -48,6 +51,7 @@ export default function HomeScreen({ navigation }) {
           free: true,
           icon: '🤖',
           instructor: 'Ana Martínez',
+          enrolled: false,
         },
         {
           id: 4,
@@ -59,6 +63,7 @@ export default function HomeScreen({ navigation }) {
           free: true,
           instructor: 'Daniela Wong',
           icon: '🔧',
+          enrolled: false,
         },
         {
           id: 5,
@@ -70,10 +75,11 @@ export default function HomeScreen({ navigation }) {
           free: false,
           instructor: 'Laura Chen',
           icon: '🛡️',
+          enrolled: false,
         },
       ],
     },
-  ];
+  ]);
 
   const featuredStories = [
     {
@@ -102,17 +108,86 @@ export default function HomeScreen({ navigation }) {
     },
   ];
 
-  // Función para manejar la navegación de los botones
-  const handleQuickActionPress = (screen) => {
-    if (screen) {
-      navigation.navigate(screen);
+  // Función para manejar inscripción con confirmación
+  const handleEnroll = (courseId, courseTitle) => {
+    Alert.alert(
+      '¿Te interesa este curso?',
+      `¿Deseas inscribirte en "${courseTitle}"?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: '¡Sí, inscribirme!',
+          onPress: () => {
+            // Actualizar el estado para marcar como inscrito
+            setProgressData(prevData =>
+              prevData.map(section => ({
+                ...section,
+                data: section.data.map(item =>
+                  item.id === courseId ? { ...item, enrolled: true } : item
+                )
+              }))
+            );
+
+            Alert.alert(
+              '¡Inscripción Exitosa! 🎉',
+              `Te has inscrito en: ${courseTitle}`,
+              [{ text: '¡Empezar a aprender!' }]
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  // Función para continuar curso
+  const handleContinue = (courseId, courseTitle) => {
+    Alert.alert(
+      'Continuar Curso',
+      `Continuando: ${courseTitle}`,
+      [
+        {
+          text: 'Más tarde',
+          style: 'cancel'
+        },
+        {
+          text: 'Continuar ahora',
+          onPress: () => {
+            // Incrementar progreso
+            setProgressData(prevData =>
+              prevData.map(section => ({
+                ...section,
+                data: section.data.map(item =>
+                  item.id === courseId && item.progress < 100
+                    ? { ...item, progress: Math.min(item.progress + 10, 100) }
+                    : item
+                )
+              }))
+            );
+          }
+        }
+      ]
+    );
+  };
+
+  // Función para navegación de "Ver todo"
+  const handleSeeAll = (section) => {
+    if (section === 'Mi Aprendizaje' || section === 'Cursos Recomendados') {
+      navigation.navigate('Cursos');
+    } else if (section === 'Historias Inspiradoras') {
+      navigation.navigate('Inspiración');
     }
   };
 
-  const renderProgressItem = ({ item }) => (
-    <Pressable 
+  // Componente de ítem de progreso (anteriormente con un objeto deconstruido)
+  // Ahora usa el parámetro 'item' directamente para ser más compatible con la iteración manual.
+  const renderProgressItem = (item) => (
+    <Pressable
+      key={item.id} // Añadido el 'key' prop aquí
       style={styles.progressCard}
-      onPress={() => navigation.navigate('Course', { courseId: item.id })}
+      onPress={() => handleContinue(item.id, item.course)}
     >
       <View style={styles.progressHeader}>
         <View style={styles.courseIconContainer}>
@@ -124,28 +199,34 @@ export default function HomeScreen({ navigation }) {
         </View>
         <Text style={styles.progressPercent}>{item.progress}%</Text>
       </View>
-      
+
       <View style={styles.progressBar}>
-        <View 
-          style={[styles.progressFill, { width: `${item.progress}%` }]} 
+        <View
+          style={[styles.progressFill, { width: `${item.progress}%` }]}
         />
       </View>
-      
+
       <View style={styles.progressFooter}>
         <View style={styles.timeBadge}>
           <Text style={styles.timeText}>⏱️ {item.timeLeft}</Text>
         </View>
-        <Pressable style={styles.continueButton}>
+        <Pressable
+          style={styles.continueButton}
+          onPress={() => handleContinue(item.id, item.course)}
+        >
           <Text style={styles.continueButtonText}>Continuar</Text>
         </Pressable>
       </View>
     </Pressable>
   );
 
-  const renderCourseItem = ({ item }) => (
-    <Pressable 
+  // Componente de ítem de curso recomendado (anteriormente con un objeto deconstruido)
+  // Ahora usa el parámetro 'item' directamente para ser más compatible con la iteración manual.
+  const renderCourseItem = (item) => (
+    <Pressable
+      key={item.id} // Añadido el 'key' prop aquí
       style={styles.courseCard}
-      onPress={() => navigation.navigate('CourseDetail', { course: item })}
+      onPress={() => item.enrolled ? handleContinue(item.id, item.title) : handleEnroll(item.id, item.title)}
     >
       <View style={styles.courseHeader}>
         <View style={styles.courseIconContainer}>
@@ -182,21 +263,32 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.courseFooter}>
-        <View style={[styles.levelContainer, 
-          { backgroundColor: item.level === 'Principiante' ? '#E6F7FF' : '#F0E6FF' }
+        <View style={[styles.levelContainer,
+        { backgroundColor: item.level === 'Principiante' ? '#E6F7FF' : '#F0E6FF' }
         ]}>
-          <Text style={[styles.levelText, 
-            { color: item.level === 'Principiante' ? '#1890FF' : '#8A2BE2' }
+          <Text style={[styles.levelText,
+          { color: item.level === 'Principiante' ? '#1890FF' : '#8A2BE2' }
           ]}>
             {item.level}
           </Text>
         </View>
-        <Pressable style={[
-          styles.enrollButton,
-          item.free ? styles.enrollButtonFree : styles.enrollButtonPaid
-        ]}>
+        <Pressable
+          style={[
+            styles.enrollButton,
+            item.enrolled
+              ? styles.enrollButtonEnrolled
+              : styles.enrollButtonFree
+          ]}
+          onPress={() => {
+            if (item.enrolled) {
+              handleContinue(item.id, item.title);
+            } else {
+              handleEnroll(item.id, item.title);
+            }
+          }}
+        >
           <Text style={styles.enrollButtonText}>
-            {item.free ? 'Inscribirse' : 'Ver detalles'}
+            {item.enrolled ? 'Continuar' : 'Inscribirse'}
           </Text>
         </Pressable>
       </View>
@@ -204,7 +296,11 @@ export default function HomeScreen({ navigation }) {
   );
 
   const renderStoryItem = (story) => (
-    <Pressable key={story.id} style={styles.storyCard}>
+    <Pressable
+      key={story.id} // El 'key' prop ya estaba aquí correctamente
+      style={styles.storyCard}
+      onPress={() => navigation.navigate('Inspiración')}
+    >
       <View style={styles.storyImage}>
         <Text style={styles.storyEmoji}>{story.image}</Text>
       </View>
@@ -243,15 +339,19 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.sectionTitle}>📖 Historias Inspiradoras</Text>
               <Text style={styles.sectionSubtitle}>Conoce a mujeres extraordinarias en STEM</Text>
             </View>
-            <Pressable style={styles.seeAllButton}>
+            <Pressable
+              style={styles.seeAllButton}
+              onPress={() => handleSeeAll('Historias Inspiradoras')}
+            >
               <Text style={styles.seeAllText}>Ver todo</Text>
             </Pressable>
           </View>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.storiesContainer}
           >
+            {/* El 'key' prop ya está en renderStoryItem, esto está bien */}
             {featuredStories.map(renderStoryItem)}
           </ScrollView>
         </View>
@@ -263,11 +363,15 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.sectionTitle}>🎯 Mi Aprendizaje</Text>
               <Text style={styles.sectionSubtitle}>Continúa donde dejaste</Text>
             </View>
-            <Pressable style={styles.seeAllButton}>
+            <Pressable
+              style={styles.seeAllButton}
+              onPress={() => handleSeeAll('Mi Aprendizaje')}
+            >
               <Text style={styles.seeAllText}>Ver todo</Text>
             </Pressable>
           </View>
-          {progressData[0].data.map((item) => renderProgressItem({ item }))}
+          {/* CORRECCIÓN: Se pasó la 'key' al componente renderizado */}
+          {progressData[0].data.map((item) => renderProgressItem(item))}
         </View>
 
         {/* Sección de Cursos Recomendados */}
@@ -277,17 +381,24 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.sectionTitle}>💡 Recomendados</Text>
               <Text style={styles.sectionSubtitle}>Cursos seleccionados para ti</Text>
             </View>
-            <Pressable style={styles.seeAllButton}>
+            <Pressable
+              style={styles.seeAllButton}
+              onPress={() => handleSeeAll('Cursos Recomendados')}
+            >
               <Text style={styles.seeAllText}>Ver todo</Text>
             </Pressable>
           </View>
-          {progressData[1].data.map((item) => renderCourseItem({ item }))}
+          {/* CORRECCIÓN: Se pasó la 'key' al componente renderizado */}
+          {progressData[1].data.map((item) => renderCourseItem(item))}
         </View>
 
         {/* Logros */}
         <View style={styles.section}>
-          <Pressable style={styles.achievementCard}>
-            <View style={styles.achievementIcon}>🏆</View>
+          <Pressable
+            style={styles.achievementCard}
+            onPress={() => Alert.alert('Logros', 'Aquí verías todos tus logros e insignias')}
+          >
+            <View style={styles.achievementIcon}><Text>🏆</Text></View>
             <View style={styles.achievementContent}>
               <Text style={styles.achievementTitle}>Logro "Aprendiz STEM"</Text>
               <Text style={styles.achievementText}>
@@ -311,7 +422,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -322,6 +433,7 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  // ... (Tus estilos se mantienen sin cambios)
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -658,8 +770,8 @@ const styles = StyleSheet.create({
   enrollButtonFree: {
     backgroundColor: '#8A2BE2',
   },
-  enrollButtonPaid: {
-    backgroundColor: '#4a5568',
+  enrollButtonEnrolled: {
+    backgroundColor: '#10B981',
   },
   enrollButtonText: {
     color: '#fff',
@@ -715,6 +827,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressText: {
+    
     fontSize: 12,
     color: '#718096',
     fontWeight: '500',
