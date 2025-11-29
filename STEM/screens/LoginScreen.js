@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,10 @@ import {
   Platform,
   ActivityIndicator,
   Modal,
-  TouchableOpacity,
 } from 'react-native';
+import ControladorAutenticacion from '../controllers/ControladorAutenticacion'; // Asegúrate de que la ruta sea correcta
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -31,35 +31,56 @@ export default function LoginScreen({ navigation }) {
     confirmPassword: ''
   });
 
+  useEffect(() => {
+    if (route.params?.error) {
+      Alert.alert("Error de Autenticación", route.params.error);
+      navigation.setParams({ error: undefined });
+    }
+  }, [route.params, navigation]);
+
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Error', 'Completa todos los campos.');
       return;
     }
 
-    // Validación simple de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Por favor ingresa un email válido.');
       return;
     }
 
-    // Simular proceso de login
     setLoading(true);
-    
-    // Simular delay de red
-    setTimeout(() => {
+
+    try {
+      const resultado = await ControladorAutenticacion.iniciarSesion({
+        usuario: email.trim(),
+        contraseña: password.trim()
+      });
+
       setLoading(false);
-      // Navegar a la pantalla principal después del login exitoso
-      navigation.navigate('Main');
-    }, 1500);
+
+      if (resultado.exito) {
+        Alert.alert('Éxito', resultado.mensaje);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      } else {
+        Alert.alert('Error', resultado.mensaje);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error en login:', error);
+      Alert.alert('Error', 'Problema de conexión con la base de datos. Reinstala la app.');
+    }
   };
 
   const handleForgotPassword = () => {
     setForgotPasswordModal(true);
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!resetEmail.trim()) {
       Alert.alert('Error', 'Por favor ingresa tu email.');
       return;
@@ -71,17 +92,42 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    // Simular envío de email
-    Alert.alert('Éxito', `Se ha enviado un enlace de recuperación a ${resetEmail}`);
-    setForgotPasswordModal(false);
-    setResetEmail('');
+    setLoading(true);
+
+    try {
+      const resultado = await ControladorAutenticacion.recuperarContraseña({
+        usuarioOCorreo: resetEmail.trim()
+      });
+
+      setLoading(false);
+
+      if (resultado.exito) {
+        Alert.alert(
+          'Éxito', 
+          resultado.mensaje,
+          [{ 
+            text: 'OK', 
+            onPress: () => {
+              setForgotPasswordModal(false);
+              setResetEmail('');
+            }
+          }]
+        );
+      } else {
+        Alert.alert('Error', resultado.mensaje);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error en recuperación:', error);
+      Alert.alert('Error', 'Problema de conexión con la base de datos. Reinstala la app.');
+    }
   };
 
   const handleRegister = () => {
     setRegisterModal(true);
   };
 
-  const handleRegisterSubmit = () => {
+  const handleRegisterSubmit = async () => {
     const { name, email, password, confirmPassword } = registerData;
 
     if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
@@ -105,15 +151,47 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    // Simular registro exitoso
-    Alert.alert('Éxito', '¡Cuenta creada exitosamente!');
-    setRegisterModal(false);
-    setRegisterData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
+    setLoading(true);
+
+    try {
+      const resultado = await ControladorAutenticacion.registrar({
+        usuario: name.trim(),
+        correo: email.trim(),
+        contraseña: password.trim()
+      });
+
+      setLoading(false);
+
+      if (resultado.exito) {
+        Alert.alert(
+          '¡Éxito!', 
+          resultado.mensaje,
+          [
+            {
+              text: 'Continuar',
+              onPress: () => {
+                setRegisterModal(false);
+                setRegisterData({
+                  name: '',
+                  email: '',
+                  password: '',
+                  confirmPassword: ''
+                });
+                // Auto-completar el login después del registro
+                setEmail(registerData.email);
+                setPassword(registerData.password);
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Error', resultado.mensaje);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error en registro:', error);
+      Alert.alert('Error', 'Problema de conexión con la base de datos. Reinstala la app.');
+    }
   };
 
   const updateRegisterData = (field, value) => {
@@ -188,17 +266,20 @@ export default function LoginScreen({ navigation }) {
                 </View>
               </View>
 
-              <Pressable 
-                style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
-                onPress={handleLogin}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#8A2BE2" />
+                  <Text style={styles.loadingText}>Verificando credenciales...</Text>
+                </View>
+              ) : (
+                <Pressable 
+                  style={styles.loginButton} 
+                  onPress={handleLogin}
+                  disabled={loading}
+                >
                   <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
-                )}
-              </Pressable>
+                </Pressable>
+              )}
 
               <Pressable 
                 style={styles.forgotPassword} 
@@ -246,20 +327,30 @@ export default function LoginScreen({ navigation }) {
               onChangeText={setResetEmail}
               autoCapitalize="none"
               keyboardType="email-address"
+              editable={!loading}
             />
 
             <View style={styles.modalButtons}>
               <Pressable 
                 style={[styles.modalButton, styles.modalButtonSecondary]}
-                onPress={() => setForgotPasswordModal(false)}
+                onPress={() => {
+                  setForgotPasswordModal(false);
+                  setResetEmail('');
+                }}
+                disabled={loading}
               >
                 <Text style={styles.modalButtonTextSecondary}>Cancelar</Text>
               </Pressable>
               <Pressable 
-                style={[styles.modalButton, styles.modalButtonPrimary]}
+                style={[styles.modalButton, styles.modalButtonPrimary, loading && styles.modalButtonDisabled]}
                 onPress={handleResetPassword}
+                disabled={loading}
               >
-                <Text style={styles.modalButtonTextPrimary}>Enviar Enlace</Text>
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.modalButtonTextPrimary}>Enviar Enlace</Text>
+                )}
               </Pressable>
             </View>
           </View>
@@ -276,6 +367,9 @@ export default function LoginScreen({ navigation }) {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, styles.registerModalContent]}>
             <Text style={styles.modalTitle}>Crear Cuenta</Text>
+            <Text style={styles.modalSubtitle}>
+              Únete a nuestra comunidad de mujeres en STEM
+            </Text>
             
             <TextInput
               style={styles.modalInput}
@@ -283,6 +377,7 @@ export default function LoginScreen({ navigation }) {
               placeholderTextColor="#999"
               value={registerData.name}
               onChangeText={(text) => updateRegisterData('name', text)}
+              editable={!loading}
             />
 
             <TextInput
@@ -293,15 +388,17 @@ export default function LoginScreen({ navigation }) {
               onChangeText={(text) => updateRegisterData('email', text)}
               autoCapitalize="none"
               keyboardType="email-address"
+              editable={!loading}
             />
 
             <TextInput
               style={styles.modalInput}
-              placeholder="Contraseña"
+              placeholder="Contraseña (mínimo 6 caracteres)"
               placeholderTextColor="#999"
               value={registerData.password}
               onChangeText={(text) => updateRegisterData('password', text)}
               secureTextEntry
+              editable={!loading}
             />
 
             <TextInput
@@ -311,20 +408,35 @@ export default function LoginScreen({ navigation }) {
               value={registerData.confirmPassword}
               onChangeText={(text) => updateRegisterData('confirmPassword', text)}
               secureTextEntry
+              editable={!loading}
             />
 
             <View style={styles.modalButtons}>
               <Pressable 
                 style={[styles.modalButton, styles.modalButtonSecondary]}
-                onPress={() => setRegisterModal(false)}
+                onPress={() => {
+                  setRegisterModal(false);
+                  setRegisterData({
+                    name: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: ''
+                  });
+                }}
+                disabled={loading}
               >
                 <Text style={styles.modalButtonTextSecondary}>Cancelar</Text>
               </Pressable>
               <Pressable 
-                style={[styles.modalButton, styles.modalButtonPrimary]}
+                style={[styles.modalButton, styles.modalButtonPrimary, loading && styles.modalButtonDisabled]}
                 onPress={handleRegisterSubmit}
+                disabled={loading}
               >
-                <Text style={styles.modalButtonTextPrimary}>Registrarse</Text>
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.modalButtonTextPrimary}>Registrarse</Text>
+                )}
               </Pressable>
             </View>
           </View>
@@ -438,9 +550,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  loginButtonDisabled: {
-    opacity: 0.7,
-  },
   loginButtonText: {
     color: '#fff',
     fontSize: 18,
@@ -453,21 +562,6 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: '#8A2BE2',
     fontSize: 16,
-    fontWeight: '500',
-  },
-  separator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 25,
-  },
-  separatorLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#ecf0f1',
-  },
-  separatorText: {
-    marginHorizontal: 15,
-    color: '#7f8c8d',
     fontWeight: '500',
   },
   registerSection: {
@@ -486,6 +580,16 @@ const styles = StyleSheet.create({
     color: '#8A2BE2',
     fontWeight: '600',
     fontSize: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    marginVertical: 15,
+    width: '100%',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#666',
   },
   // Estilos para modales
   modalOverlay: {
@@ -556,6 +660,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  modalButtonDisabled: {
+    opacity: 0.7,
   },
   modalButtonTextPrimary: {
     color: 'white',
