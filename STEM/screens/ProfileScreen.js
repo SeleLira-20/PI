@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,45 @@ import {
   SafeAreaView,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation, route }) {
+  const [usuario, setUsuario] = useState(null);
+  const [cargando, setCargando] = useState(true);
+
+  // Obtener los datos del usuario desde AsyncStorage
+  useEffect(() => {
+    const obtenerUsuarioActual = async () => {
+      try {
+        const usuarioGuardado = await AsyncStorage.getItem('usuarioActual');
+        if (usuarioGuardado) {
+          setUsuario(JSON.parse(usuarioGuardado));
+        }
+      } catch (error) {
+        console.error('Error al obtener usuario:', error);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    obtenerUsuarioActual();
+  }, []);
+
+  // Generar iniciales para el avatar
+  const getInitials = (name) => {
+    if (!name) return 'US';
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   const profileData = [
     {
       title: '🎯 Logros',
@@ -85,7 +119,7 @@ export default function ProfileScreen({ navigation }) {
   ];
 
   // Función para mostrar el alert de confirmación
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert(
       'Cerrar Sesión',
       '¿Estás segura de que quieres cerrar sesión?',
@@ -98,9 +132,16 @@ export default function ProfileScreen({ navigation }) {
         {
           text: 'Sí, Cerrar Sesión',
           style: 'destructive',
-          onPress: () => {
-            console.log('Sesión cerrada');
-            navigation.navigate('Login');
+          onPress: async () => {
+            try {
+              // Limpiar datos del usuario al cerrar sesión
+              await AsyncStorage.removeItem('usuarioActual');
+              console.log('Sesión cerrada');
+              navigation.navigate('Login');
+            } catch (error) {
+              console.error('Error al cerrar sesión:', error);
+              navigation.navigate('Login');
+            }
           }
         }
       ],
@@ -141,9 +182,13 @@ export default function ProfileScreen({ navigation }) {
   const renderPostItem = (item) => (
     <View key={item.id} style={styles.postItem}>
       <View style={styles.postHeader}>
-        <View style={styles.postAvatar} />
+        <View style={styles.postAvatar}>
+          <Text style={styles.postAvatarText}>
+            {getInitials(usuario?.usuario)}
+          </Text>
+        </View>
         <View style={styles.postUserInfo}>
-          <Text style={styles.postUserName}>María Sánchez</Text>
+          <Text style={styles.postUserName}>{usuario?.usuario || 'Usuario'}</Text>
           <Text style={styles.postTime}>{item.time}</Text>
         </View>
       </View>
@@ -165,31 +210,42 @@ export default function ProfileScreen({ navigation }) {
     </View>
   );
 
-  // En ProfileScreen.js - busca la función renderSection y reemplázala:
-const renderSection = (section) => (
-  <View key={section.title} style={styles.section}>
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{section.title}</Text>
-      {section.title.includes('Publicaciones') && (
-        <Pressable 
-          style={styles.seeAllButton}
-          onPress={() => navigation.navigate('MisPublicaciones')}
-        >
-          <Text style={styles.seeAllText}>Ver todo</Text>
-        </Pressable>
-      )}
+  const renderSection = (section) => (
+    <View key={section.title} style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{section.title}</Text>
+        {section.title.includes('Publicaciones') && (
+          <Pressable 
+            style={styles.seeAllButton}
+            onPress={() => navigation.navigate('MisPublicaciones')}
+          >
+            <Text style={styles.seeAllText}>Ver todo</Text>
+          </Pressable>
+        )}
+      </View>
+      {section.data.map((item) => {
+        if (section.title.includes('Logros')) {
+          return renderAchievementItem(item);
+        } else if (section.title.includes('Cursos')) {
+          return renderCourseItem(item);
+        } else {
+          return renderPostItem(item);
+        }
+      })}
     </View>
-    {section.data.map((item) => {
-      if (section.title.includes('Logros')) {
-        return renderAchievementItem(item);
-      } else if (section.title.includes('Cursos')) {
-        return renderCourseItem(item);
-      } else {
-        return renderPostItem(item);
-      }
-    })}
-  </View>
-);
+  );
+
+  // Mostrar loading mientras se cargan los datos
+  if (cargando) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#8A2BE2" />
+          <Text style={styles.loadingText}>Cargando perfil...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -197,21 +253,23 @@ const renderSection = (section) => (
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header del perfil - VERSIÓN CORREGIDA */}
+        {/* Header del perfil */}
         <View style={styles.profileHeader}>
           <View style={styles.headerBackground} />
           
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>MS</Text>
+                <Text style={styles.avatarText}>
+                  {getInitials(usuario?.usuario)}
+                </Text>
               </View>
               <View style={styles.onlineIndicator} />
             </View>
           </View>
 
           <View style={styles.profileInfoSection}>
-            <Text style={styles.profileName}>María Sánchez</Text>
+            <Text style={styles.profileName}>{usuario?.usuario || 'Usuario'}</Text>
             <Text style={styles.profileRole}>Ingeniera de Software</Text>
             <Text style={styles.profileBio}>
               Apasionada por el desarrollo de aplicaciones móviles y mentoría de mujeres en tech
@@ -249,10 +307,21 @@ const renderSection = (section) => (
   );
 }
 
+// AÑADE estos estilos nuevos:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
   scrollContent: {
     flexGrow: 1,
@@ -523,6 +592,13 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     backgroundColor: '#8A2BE2',
     marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postAvatarText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   postUserInfo: {
     flex: 1,

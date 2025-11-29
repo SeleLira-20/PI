@@ -14,7 +14,8 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
-import ControladorAutenticacion from '../controllers/ControladorAutenticacion'; // Asegúrate de que la ruta sea correcta
+import ControladorAutenticacion from '../controllers/ControladorAutenticacion';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Añade esta importación
 
 export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
@@ -61,10 +62,18 @@ export default function LoginScreen({ navigation, route }) {
       setLoading(false);
 
       if (resultado.exito) {
+        // GUARDAR DATOS DEL USUARIO EN ASYNCSTORAGE
+        await AsyncStorage.setItem('usuarioActual', JSON.stringify(resultado.usuario));
+        
         Alert.alert('Éxito', resultado.mensaje);
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Main' }],
+          routes: [{ 
+            name: 'Main', 
+            params: { 
+              usuario: resultado.usuario // ← PASAMOS LOS DATOS DEL USUARIO
+            }
+          }],
         });
       } else {
         Alert.alert('Error', resultado.mensaje);

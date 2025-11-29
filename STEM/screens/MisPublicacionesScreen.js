@@ -15,6 +15,7 @@ import {
   Platform
 } from 'react-native';
 import { PublicacionController } from '../controllers/PublicacionController';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const controller = new PublicacionController();
 
@@ -25,6 +26,23 @@ export default function MisPublicacionesScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
+   const [nombreUsuario, setNombreUsuario] = useState('');
+
+   useEffect(() => {
+    const obtenerNombreUsuario = async () => {
+      try {
+        const usuarioGuardado = await AsyncStorage.getItem('usuarioActual');
+        if (usuarioGuardado) {
+          const usuario = JSON.parse(usuarioGuardado);
+          setNombreUsuario(usuario.usuario);
+        }
+      } catch (error) {
+        console.error('Error al obtener usuario:', error);
+      }
+    };
+
+    obtenerNombreUsuario();
+  }, []);
 
   const cargarPublicaciones = useCallback(async () => {
     try {
@@ -116,7 +134,7 @@ export default function MisPublicacionesScreen({ navigation }) {
       <View style={styles.publicacionHeader}>
         <View style={styles.avatar} />
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>María Sánchez</Text>
+          <Text style={styles.userName}>{nombreUsuario || 'Usuario'}</Text>
           <Text style={styles.fecha}>
             {new Date(item.fechaCreacion).toLocaleDateString('es-MX', {
               year: 'numeric',
