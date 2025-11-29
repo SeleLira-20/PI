@@ -165,25 +165,31 @@ export default function ProfileScreen({ navigation }) {
     </View>
   );
 
-  const renderSection = (section) => (
-    <View key={section.title} style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{section.title}</Text>
-        <Pressable style={styles.seeAllButton}>
+  // En ProfileScreen.js - busca la función renderSection y reemplázala:
+const renderSection = (section) => (
+  <View key={section.title} style={styles.section}>
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{section.title}</Text>
+      {section.title.includes('Publicaciones') && (
+        <Pressable 
+          style={styles.seeAllButton}
+          onPress={() => navigation.navigate('MisPublicaciones')}
+        >
           <Text style={styles.seeAllText}>Ver todo</Text>
         </Pressable>
-      </View>
-      {section.data.map((item) => {
-        if (section.title.includes('Logros')) {
-          return renderAchievementItem(item);
-        } else if (section.title.includes('Cursos')) {
-          return renderCourseItem(item);
-        } else {
-          return renderPostItem(item);
-        }
-      })}
+      )}
     </View>
-  );
+    {section.data.map((item) => {
+      if (section.title.includes('Logros')) {
+        return renderAchievementItem(item);
+      } else if (section.title.includes('Cursos')) {
+        return renderCourseItem(item);
+      } else {
+        return renderPostItem(item);
+      }
+    })}
+  </View>
+);
 
   return (
     <SafeAreaView style={styles.container}>
